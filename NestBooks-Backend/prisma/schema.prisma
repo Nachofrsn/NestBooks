@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Authors {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  books Books[]
+}
+
+model Books {
+  id          Int     @id @default(autoincrement())
+  title       String?
+  description String?
+  rating      String?
+  cover_i     String?
+  genres      String?
+  pages       String?
+  authorId    Int
+  author      Authors @relation(fields: [authorId], references: [id])
+  users       UserBook[]
+}
+
+model Users {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String
+  name     String?
+  books    UserBook[]
+}
+
+model UserBook {
+  id      Int     @id @default(autoincrement())
+  userId  Int
+  bookId  Int
+  user    Users   @relation(fields: [userId], references: [id])
+  book    Books   @relation(fields: [bookId], references: [id])
+
+  @@unique([userId, bookId]) 
+}
