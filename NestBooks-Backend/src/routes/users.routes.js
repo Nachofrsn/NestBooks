@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = "1b2d3f4e5g6h7j8k9l0a1b2c3d4e5f6g7h8i9j0k1l2m3n4";
 
 const router = Router();
 const prisma = new PrismaClient();

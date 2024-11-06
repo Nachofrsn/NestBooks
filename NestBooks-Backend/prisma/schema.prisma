@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = "file:./NestBooks.db"
 }
 
 model Authors {
@@ -14,7 +14,7 @@ model Authors {
 }
 
 model Books {
-  id          Int     @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   title       String?
   description String?
   rating      String?
@@ -22,24 +22,24 @@ model Books {
   genres      String?
   pages       String?
   authorId    Int
-  author      Authors @relation(fields: [authorId], references: [id])
+  author      Authors    @relation(fields: [authorId], references: [id])
   users       UserBook[]
 }
 
 model Users {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
+  id       Int        @id @default(autoincrement())
+  email    String     @unique
   password String
   name     String?
   books    UserBook[]
 }
 
 model UserBook {
-  id      Int     @id @default(autoincrement())
-  userId  Int
-  bookId  Int
-  user    Users   @relation(fields: [userId], references: [id])
-  book    Books   @relation(fields: [bookId], references: [id])
+  id     Int   @id @default(autoincrement())
+  userId Int
+  bookId Int
+  book   Books @relation(fields: [bookId], references: [id])
+  user   Users @relation(fields: [userId], references: [id])
 
-  @@unique([userId, bookId]) 
+  @@unique([userId, bookId])
 }
