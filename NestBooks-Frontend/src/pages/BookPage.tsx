@@ -11,22 +11,33 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Star } from "lucide-react";
 
-import { Link, useLocation } from "react-router-dom";
+// @ts-ignore
+import useAuthStore from "../store/authStore";
+
+import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "sonner";
+import { Header } from "@/components/ui/header";
 
 export default function Component() {
   const [rating, setRating] = useState(0);
   const location = useLocation();
   const book = location.state.book;
 
+  const navigate = useNavigate();
+
+  const { user } = useAuthStore();
+
+  const checkUserOnClick = () => {
+    if (!user) {
+      toast.error("Debes iniciar sesión para cambiar el estado");
+      navigate("/login");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background p-4">
       {/* Navigation */}
-      <nav className="container mx-auto flex justify-between mb-6">
-        <Button variant="ghost">explorar</Button>
-        <Link to="/profile">
-          <Button variant="ghost">cuenta</Button>
-        </Link>
-      </nav>
+      <Header />
 
       <Card className="container mx-auto p-6">
         <div className="flex gap-6">
@@ -37,14 +48,18 @@ export default function Component() {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                       
+                >
                   estado
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem>leído</DropdownMenuItem>
-                <DropdownMenuItem>quiero leer</DropdownMenuItem>
-                <DropdownMenuItem>leyendo</DropdownMenuItem>
+                <DropdownMenuItem onClick={checkUserOnClick}>leído</DropdownMenuItem>
+                <DropdownMenuItem onClick={checkUserOnClick}>quiero leer</DropdownMenuItem>
+                <DropdownMenuItem onClick={checkUserOnClick}>leyendo</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

@@ -125,7 +125,7 @@ const RegisterForm = () => {
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
+            Ya tienes una cuenta?{" "}
             <a href="/login" className="text-primary hover:underline">
               Log in
             </a>
