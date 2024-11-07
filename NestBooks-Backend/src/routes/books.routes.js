@@ -59,43 +59,4 @@ router.post("/bookdetails", async (req, res) => {
   }
 });
 
-
-router.get("/user/books", async (req, res) => {
-  const { userId, status } = req.query;
-  try {
-    const books = await prisma.userBook.findMany({
-      where: {
-        userId: parseInt(userId),
-        status: status,
-      },
-      include: {
-        book: true,
-      },
-    });
-    res.json(books);
-  } catch (e) {
-    res.status(500).json({ error: "Error fetching books" });
-  }
-});
-
-router.post('/userBooks', async (req, res) => {
-  const { userId, status } = req.body;
-
-  try {
-    const books = await prisma.userBook.findMany({
-      where: {
-        userId: userId,
-        status: status,
-      },
-      include: {
-        book: true,
-      },
-    });
-
-    res.json({ books: books.map((userBook) => userBook.book) });
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los libros.' });
-  }
-});
-
 export default router;
