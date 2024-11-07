@@ -43,4 +43,59 @@ router.get("/books", async (req, res) => {
   }
 });
 
+router.post("/bookdetails", async (req, res) => {
+  const { userId, bookId, status } = req.body;
+  try {
+    const bookStatus = await prisma.userBook.upsert({
+      where: { userId_bookId: { userId, bookId } },
+      update: { status },
+      create: { userId, bookId, status },
+    });
+
+    res.json({ message: "Estado del libro actualizado", bookStatus });
+  } catch (e) {
+    console.log("Error updating book status:", e);
+    res.status(500).json({ error: "Error updating book status" });
+  }
+});
+
+
+router.get("/user/books", async (req, res) => {
+  const { userId, status } = req.query;
+  try {
+    const books = await prisma.userBook.findMany({
+      where: {
+        userId: parseInt(userId),
+        status: status,
+      },
+      include: {
+        book: true,
+      },
+    });
+    res.json(books);
+  } catch (e) {
+    res.status(500).json({ error: "Error fetching books" });
+  }
+});
+
+router.post('/userBooks', async (req, res) => {
+  const { userId, status } = req.body;
+
+  try {
+    const books = await prisma.userBook.findMany({
+      where: {
+        userId: userId,
+        status: status,
+      },
+      include: {
+        book: true,
+      },
+    });
+
+    res.json({ books: books.map((userBook) => userBook.book) });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los libros.' });
+  }
+});
+
 export default router;

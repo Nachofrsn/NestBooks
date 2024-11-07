@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -18,20 +18,63 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { Header } from "@/components/ui/header";
 
+// Definir los estados posibles
+type BookStatus = "leído" | "quiero leer" | "leyendo";
+
 export default function Component() {
   const [rating, setRating] = useState(0);
+  const [status, setStatus] = useState<BookStatus | null>(null); // Inicializamos como null
   const location = useLocation();
-  const book = location.state.book;
+  const book = location.state?.book; // Usamos el operador de encadenamiento opcional
 
   const navigate = useNavigate();
 
   const { user } = useAuthStore();
 
-  const checkUserOnClick = () => {
+  // Verificar si el libro tiene un estado asignado al cargarse
+  useEffect(() => {
+    if (book && book.status) {
+      setStatus(book.status as BookStatus); // Asignar el estado del libro si existe
+    }
+  }, [book]);
+
+  // Función para manejar el cambio de estado del libro
+  const updateBookStatus = async (newStatus: BookStatus) => {
     if (!user) {
       toast.error("Debes iniciar sesión para cambiar el estado");
       navigate("/login");
+      return;
     }
+  
+    try {
+      const response = await fetch("http://localhost:3001/api/bookdetails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.id, 
+          bookId: book.id, 
+          status: newStatus, 
+        }),
+      });
+  
+      if (response.ok) {
+        setStatus(newStatus);
+        toast.success(`El estado del libro ha sido actualizado a: ${newStatus}`);
+      } else {
+        throw new Error("No se pudo actualizar el estado del libro.");
+      }
+    } catch (error) {
+      toast.error("Error al actualizar el estado del libro.");
+      console.error(error);
+    }
+  };
+  
+  
+
+  if (!book) {
+    return <div>No se encontró el libro</div>;
   }
 
   return (
@@ -48,18 +91,29 @@ export default function Component() {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                       
-                >
-                  estado
+                <Button variant="outline" className="w-full">
+                  Estado
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={checkUserOnClick}>leído</DropdownMenuItem>
-                <DropdownMenuItem onClick={checkUserOnClick}>quiero leer</DropdownMenuItem>
-                <DropdownMenuItem onClick={checkUserOnClick}>leyendo</DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => updateBookStatus("leído")}
+                  disabled={status === "leído"} // Deshabilitar si ya está en ese estado
+                >
+                  Leído
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => updateBookStatus("quiero leer")}
+                  disabled={status === "quiero leer"} // Deshabilitar si ya está en ese estado
+                >
+                  Quiero Leer
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => updateBookStatus("leyendo")}
+                  disabled={status === "leyendo"} // Deshabilitar si ya está en ese estado
+                >
+                  Leyendo
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -90,9 +144,7 @@ export default function Component() {
                   key={star}
                   onClick={() => setRating(star)}
                   className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                    star <= rating
-                      ? "bg-yellow-400"
-                      : "bg-muted hover:bg-yellow-200"
+                    star <= rating ? "bg-yellow-400" : "bg-muted hover:bg-yellow-200"
                   }`}
                   aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
                 >
