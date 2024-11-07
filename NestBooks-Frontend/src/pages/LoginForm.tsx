@@ -76,8 +76,16 @@ const LoginForm = () => {
             )}
             {error && <p className="text-red-500">Error en el login</p>}
             <Button type="submit" className="w-full mt-2">
-              Sign In
+              Log In
             </Button>
+            <div className="flex justify-center">
+              <p className="text-sm text-muted-foreground mt-2">
+                Sin usuario?{" "}
+                <a href="/register" className="text-primary hover:underline">
+                  Registrarse
+                </a>
+              </p>
+            </div>
           </form>
         </CardContent>
       </Card>
