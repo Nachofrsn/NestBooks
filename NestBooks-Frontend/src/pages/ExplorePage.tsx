@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,9 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-
-import { Link, useNavigate } from "react-router-dom";
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { url } from "@/utils/constants";
 import { Header } from "@/components/ui/header";
 
@@ -62,29 +61,25 @@ export const ExplorePage = () => {
     } 
   };
 
-  /*const handleNextPage = () => {
-    setPages((prevPage) => prevPage + 1);
-  };*/
-
-  const handleNavigation = (i: number) => {
-    navigate("/bookdetails", { state: { book: books[i] } });
+  const handleNavigation = (book: Book) => {
+    navigate("/bookdetails", { state: { book } });
   };
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-background p-2 sm:p-4">
       <Header />
-      <div className="flex space-x-4 mb-6">
+      <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 mb-6">
         <div className="relative flex-grow">
           <Input
             type="text"
-            placeholder="Buscar libros..."
+            placeholder="Search books..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 w-full"
           />
         </div>
         <Select value={filter} onValueChange={(value) => setFilter(value)}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filter by" />
           </SelectTrigger>
           <SelectContent>
@@ -99,30 +94,30 @@ export const ExplorePage = () => {
         </Select>
       </div>
       {books && books.length > 0 ? (
-        <div className="grid grid-cols-3 gap-6 container mx-auto">
-          {books.map((book, i) => (
-            <Card key={book.id} className="p-6">
-              <div className="flex gap-6">
-                <div className="flex flex-col gap-2">
-                  <div className="w-48 h-64 bg-muted rounded-lg flex items-center justify-center border">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 container mx-auto">
+          {books.map((book) => (
+            <Card key={book.id} className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                <div className="flex flex-col gap-2 items-center sm:items-start">
+                  <div className="w-32 h-48 sm:w-40 sm:h-56 bg-muted rounded-lg flex items-center justify-center border overflow-hidden">
                     <img
                       src={book.cover_i}
                       alt={book.title}
-                      className="w-48 h-64"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <Button
                     variant="outline"
-                    className="w-full"
-                    onClick={() => handleNavigation(i)}
+                    className="w-full max-w-[12rem]"
+                    onClick={() => handleNavigation(book)}
                   >
-                    Ver Detalles
+                    View Details
                   </Button>
                 </div>
                 <div className="flex-1">
-                  <div className="space-y-4">
-                    <h2 className="text-2xl font-semibold">{book.title}</h2>
-                    <p className="text-muted-foreground">
+                  <div className="space-y-2 sm:space-y-4">
+                    <h2 className="text-lg sm:text-xl font-semibold line-clamp-2">{book.title}</h2>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
                       {book.author.name
                         ? JSON.parse(book.author.name.replace(/'/g, '"')).join(
                             ", "
@@ -136,8 +131,26 @@ export const ExplorePage = () => {
           ))}
         </div>
       ) : (
-        <h2>No se encontraron libros.</h2>
+        <h2 className="text-center text-lg font-semibold">No books found.</h2>
       )}
+      <Pagination className="mt-6 flex justify-center">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious 
+              className="cursor-pointer" 
+              onClick={() => pages === 1 ? null : setPages(pages - 1)}
+              aria-disabled={pages === 1}
+            />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext 
+              className="cursor-pointer" 
+              onClick={() => books.length < 6 ? null : setPages(pages + 1)}
+              aria-disabled={books.length < 6}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </div>
   );
 };

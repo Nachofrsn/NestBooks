@@ -43,20 +43,6 @@ router.get("/books", async (req, res) => {
   }
 });
 
-router.post("/bookdetails", async (req, res) => {
-  const { userId, bookId, status } = req.body;
-  try {
-    const bookStatus = await prisma.userBook.upsert({
-      where: { userId_bookId: { userId, bookId } },
-      update: { status },
-      create: { userId, bookId, status },
-    });
 
-    res.json({ message: "Estado del libro actualizado", bookStatus });
-  } catch (e) {
-    console.log("Error updating book status:", e);
-    res.status(500).json({ error: "Error updating book status" });
-  }
-});
 
 export default router;

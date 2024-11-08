@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import express from "express";
 import booksRoutes from "./routes/books.routes.js";
 import usersRoutes from './routes/users.routes.js';
+import userBookRoutes from './routes/userBooks.routes.js'
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -20,6 +21,7 @@ app.use(cors({
 
 app.use("/api", booksRoutes);
 app.use("/api", usersRoutes);
+app.use("/api", userBookRoutes)
 
 app.listen(3001, () => {
   console.log("server running");
