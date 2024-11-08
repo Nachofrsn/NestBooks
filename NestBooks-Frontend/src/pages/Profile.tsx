@@ -66,7 +66,9 @@ export default function Profile() {
   const [reviewBook, setReviewBook] = useState<Book | null>(null);
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(0);
-  const [changeStatusBook, setChangeStatusBook] = useState<UserBook | null>(null);
+  const [changeStatusBook, setChangeStatusBook] = useState<UserBook | null>(
+    null
+  );
 
   useEffect(() => {
     fetchBooks();
@@ -89,8 +91,27 @@ export default function Profile() {
   };
 
   const handleReviewSubmit = async () => {
-    // Implement the review submission logic here
-    console.log("Submitting review:", { bookId: reviewBook?.id, review, rating });
+    try {
+      const response = await axios.put(`${url}/bookreviews`, {
+        userId: user.id,
+        bookId: reviewBook?.id,
+        review,
+        rating,
+      });
+
+      if (response.status === 201) {
+        toast.success("Reseña enviada con éxito");
+      }
+
+    } catch (e) {
+      console.log("Error submitting review");
+    }
+    console.log("Submitting review:", {
+      bookId: reviewBook?.id,
+      review,
+      rating,
+      userId: user.id,
+    });
     setReviewBook(null);
     setReview("");
     setRating(0);
@@ -124,9 +145,12 @@ export default function Profile() {
       toast.error("Error al actualizar el estado del libro.");
       console.error(error);
     }
-    console.log("Changing status:", { bookId: changeStatusBook.book.id, newStatus });
+    console.log("Changing status:", {
+      bookId: changeStatusBook.book.id,
+      newStatus,
+    });
     setChangeStatusBook(null);
-    await fetchBooks(); 
+    await fetchBooks();
   };
 
   return (
@@ -139,9 +163,13 @@ export default function Profile() {
               src="/placeholder.svg?height=96&width=96"
               alt="Profile photo"
             />
-            <AvatarFallback>{userBooks[0]?.user?.name.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>
+              {userBooks[0]?.user?.name.charAt(0).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
-          <h1 className="text-xl font-medium mb-4">{userBooks[0]?.user?.name}</h1>
+          <h1 className="text-xl font-medium mb-4">
+            {userBooks[0]?.user?.name}
+          </h1>
         </div>
 
         <Tabs
@@ -230,7 +258,9 @@ export default function Profile() {
           <PaginationItem>
             <PaginationNext
               className="cursor-pointer"
-              onClick={() => (userBooks.length === 6 ? null : setPages(pages + 1))}
+              onClick={() =>
+                userBooks.length === 6 ? null : setPages(pages + 1)
+              }
               aria-disabled={userBooks.length === 6}
             />
           </PaginationItem>
@@ -261,11 +291,17 @@ export default function Profile() {
                     key={star}
                     onClick={() => setRating(star)}
                     className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                      star <= rating ? "bg-yellow-400" : "bg-muted hover:bg-yellow-200"
+                      star <= rating
+                        ? "bg-yellow-400"
+                        : "bg-muted hover:bg-yellow-200"
                     }`}
                     aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
                   >
-                    <Star className={`w-5 h-5 ${star <= rating ? "text-white" : "text-muted-foreground"}`} />
+                    <Star
+                      className={`w-5 h-5 ${
+                        star <= rating ? "text-white" : "text-muted-foreground"
+                      }`}
+                    />
                   </button>
                 ))}
               </div>
@@ -276,30 +312,43 @@ export default function Profile() {
       </Dialog>
 
       {/* Change Status Modal */}
-      <Dialog open={!!changeStatusBook} onOpenChange={() => setChangeStatusBook(null)}>
+      <Dialog
+        open={!!changeStatusBook}
+        onOpenChange={() => setChangeStatusBook(null)}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cambiar estado de {changeStatusBook?.book.title}</DialogTitle>
+            <DialogTitle>
+              Cambiar estado de {changeStatusBook?.book.title}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <Button
               onClick={() => handleStatusChange("leido")}
               className="w-full"
-              variant={changeStatusBook?.status === "leido" ? "secondary" : "outline"}
+              variant={
+                changeStatusBook?.status === "leido" ? "secondary" : "outline"
+              }
             >
               Leído
             </Button>
             <Button
               onClick={() => handleStatusChange("quiero leer")}
               className="w-full"
-              variant={changeStatusBook?.status === "quiero leer" ? "secondary" : "outline"}
+              variant={
+                changeStatusBook?.status === "quiero leer"
+                  ? "secondary"
+                  : "outline"
+              }
             >
               Quiero leer
             </Button>
             <Button
               onClick={() => handleStatusChange("leyendo")}
               className="w-full"
-              variant={changeStatusBook?.status === "leyendo" ? "secondary" : "outline"}
+              variant={
+                changeStatusBook?.status === "leyendo" ? "secondary" : "outline"
+              }
             >
               Leyendo
             </Button>

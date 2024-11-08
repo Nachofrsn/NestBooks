@@ -41,6 +41,8 @@ model UserBook {
   book   Books @relation(fields: [bookId], references: [id])
   user   Users @relation(fields: [userId], references: [id])
   status String?
+  rating Int?
+  review String?
 
   @@unique([userId, bookId])
 }

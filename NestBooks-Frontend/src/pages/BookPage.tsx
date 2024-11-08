@@ -19,21 +19,51 @@ import { Header } from "@/components/ui/header";
 
 import axios from "axios";
 
-type BookStatus = "leido" | "quiero leer" | "leyendo";
+import { url } from "../utils/constants";
+
+type BookStatus = "quiero leer" | "leyendo";
+
+type User = {
+  id: number;
+  email: string;
+  password: string;
+  name: string;
+};
+
+type UserBook = {
+  user: User;
+  status: string;
+  userId: number;
+  bookId: number;
+  review: string;
+  rating: number;
+};
 
 export default function BookPage() {
-  const [rating, setRating] = useState(0);
   const [status, setStatus] = useState<BookStatus | null>(null);
+  const [bookReviews, setBookReviews] = useState<UserBook[]>([]);
+
   const location = useLocation();
   const book = location.state?.book;
+
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
   useEffect(() => {
     if (book && book.status) {
-      setStatus(book.status as BookStatus);
+      setStatus(book.status);
     }
+    fetchBookReviews();
   }, [book]);
+
+  const fetchBookReviews = async () => {
+    try {
+      const response = await axios.get(`${url}/bookreviews/${book.id}`);
+      setBookReviews(response.data);
+    } catch (error) {
+      console.error("Error fetching book reviews");
+    }
+  };
 
   const updateBookStatus = async (newStatus: BookStatus) => {
     if (!user) {
@@ -75,6 +105,10 @@ export default function BookPage() {
     return <div className="text-center p-4">No se encontró el libro</div>;
   }
 
+  const validBookReviews = bookReviews.filter(
+    (review) => review.review && review.review !== "null"
+  );
+
   return (
     <div className="min-h-screen bg-background p-2 sm:p-4">
       <Header />
@@ -97,20 +131,19 @@ export default function BookPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem
-                  onClick={() => updateBookStatus("leido")}
-                  disabled={status === "leido"}
-                >
-                  Leído
-                </DropdownMenuItem>
-                <DropdownMenuItem
                   onClick={() => updateBookStatus("quiero leer")}
-                  disabled={status === "quiero leer"}
+                  disabled={
+                    status === "quiero leer" ||
+                    bookReviews[0]?.status === "leido"
+                  }
                 >
                   Quiero Leer
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => updateBookStatus("leyendo")}
-                  disabled={status === "leyendo"}
+                  disabled={
+                    status === "leyendo" || bookReviews[0]?.status === "leido"
+                  }
                 >
                   Leyendo
                 </DropdownMenuItem>
@@ -135,33 +168,51 @@ export default function BookPage() {
               {book.description}
             </p>
           </div>
-
-          {/* Right Column - Rating and Additional Content */}
-          <div className="w-full lg:w-64 space-y-4">
-            <div className="flex justify-center lg:justify-start gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => setRating(star)}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                    star <= rating
-                      ? "bg-yellow-400"
-                      : "bg-muted hover:bg-yellow-200"
-                  }`}
-                  aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
-                >
-                  <Star
-                    className={`w-5 h-5 ${
-                      star <= rating ? "text-white" : "text-muted-foreground"
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-            <div className="h-48 bg-muted rounded-lg"></div>
-          </div>
         </div>
       </Card>
+      {/* Bottom Column - Rating */}
+      <div className="max-w-2xl mt-4">
+        {validBookReviews.length > 0 ? (
+          validBookReviews.map((review, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-4 bg-background rounded-lg shadow-sm mb-4"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                  <span className="text-primary-foreground font-semibold text-sm">
+                    {review.user.name.charAt(0)}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm">{review.user.name}</h3>
+                </div>
+              </div>
+              <div className="flex-1 mx-4">
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {review.review}
+                </p>
+              </div>
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < review.rating
+                        ? "text-yellow-400 fill-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center text-muted-foreground">
+            No hay reseñas para este libro.
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -38,7 +38,6 @@ router.get("/books", async (req, res) => {
 
     res.json(books);
   } catch (e) {
-    console.log("Error fetching books from db:", e);
     res.status(500).json({ error: "Error fetching books" });
   }
 });
