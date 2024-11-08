@@ -1,0 +1,251 @@
+openapi: 3.0.0
+info:
+  title: Book Nest API
+  version: 1.0.0
+  description: API for BookNest
+
+paths:
+  /bookdetails:
+    post:
+      summary: Updates the status of a book for a user
+      tags:
+        - UserBooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  description: ID of the user
+                bookId:
+                  type: integer
+                  description: ID of the book
+                status:
+                  type: string
+                  description: Status of the book
+              required:
+                - userId
+                - bookId
+                - status
+      responses:
+        "200":
+          description: Book status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message
+                    example: Book status updated
+                  bookStatus:
+                    type: object
+                    description: Details of the updated book status
+                    properties:
+                      userId:
+                        type: integer
+                        description: ID of the user
+                      bookId:
+                        type: integer
+                        description: ID of the book
+                      status:
+                        type: string
+                        description: Status of the book
+                        example: "Reading"
+        "500":
+          description: Error updating book status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                    example: Error updating book status
+
+  /accountdetails:
+    get:
+      summary: Get paginated books for a user by status
+      tags: [UserBooks]
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+          description: Status of the books to filter
+        - in: query
+          name: user_id
+          schema:
+            type: integer
+          description: ID of the user
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 6
+          description: Number of books per page
+      responses:
+        200:
+          description: List of books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        500:
+          description: Error getting books with pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /register:
+    post:
+      summary: Register a new user
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        201:
+          description: User registered successfully
+        400:
+          description: Error registering user
+
+  /login:
+    post:
+      summary: Login a user
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Login successful
+        401:
+          description: Invalid credentials
+
+  /protected:
+    get:
+      summary: Access protected route
+      tags: [Users]
+      responses:
+        200:
+          description: Access granted
+        401:
+          description: Token not found
+        403:
+          description: Invalid token
+
+  /session:
+    get:
+      summary: Check active session
+      tags: [Users]
+      responses:
+        200:
+          description: Active session
+        401:
+          description: Not authenticated
+        403:
+          description: Invalid token
+
+  /logout:
+    post:
+      summary: Logout user
+      tags: [Users]
+      responses:
+        200:
+          description: Session closed
+
+  /books:
+    get:
+      summary: Retrieve a list of books
+      description: Retrieve a list of books with optional pagination, filtering, and search.
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: The page number for pagination.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: The number of items per page.
+        - in: query
+          name: filter
+          schema:
+            type: string
+            default: all
+          description: Filter books by genre.
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search books by title.
+      responses:
+        200:
+          description: A list of books.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    author:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                    genres:
+                      type: string
+        500:
+          description: Error fetching books.
