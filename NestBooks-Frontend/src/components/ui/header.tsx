@@ -21,7 +21,7 @@ export const Header = () => {
   const navigate = useNavigate();
 
   return (
-    <header className="container p-4 flex justify-end gap-4">
+    <header className="container flex pt-4 justify-end gap-4">
       {!user ? (
         <>
           <Link to="/register">

@@ -1,7 +1,4 @@
-"use client";
-
 import { useState, useEffect } from "react";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -10,15 +7,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Star } from "lucide-react";
+import { Star } from 'lucide-react';
 // @ts-ignore
 import useAuthStore from "../store/authStore";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { Header } from "@/components/ui/header";
-
 import axios from "axios";
-
 import { url } from "../utils/constants";
 
 type BookStatus = "quiero leer" | "leyendo";
@@ -171,25 +166,25 @@ export default function BookPage() {
         </div>
       </Card>
       {/* Bottom Column - Rating */}
-      <div className="max-w-2xl mt-4">
+      <div className="max-w-2xl mt-4 mx-auto">
         {validBookReviews.length > 0 ? (
           validBookReviews.map((review, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-4 bg-background rounded-lg shadow-sm mb-4"
+              className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-background rounded-lg shadow-sm mb-4"
             >
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-                  <span className="text-primary-foreground font-semibold text-sm">
+              <div className="flex items-center space-x-4 mb-2 sm:mb-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary flex items-center justify-center">
+                  <span className="text-primary-foreground font-semibold text-xs sm:text-sm">
                     {review.user.name.charAt(0)}
                   </span>
                 </div>
                 <div>
-                  <h3 className="font-medium text-sm">{review.user.name}</h3>
+                  <h3 className="font-medium text-xs sm:text-sm">{review.user.name}</h3>
                 </div>
               </div>
-              <div className="flex-1 mx-4">
-                <p className="text-sm text-muted-foreground line-clamp-2">
+              <div className="flex-1 mx-0 sm:mx-4 my-2 sm:my-0">
+                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
                   {review.review}
                 </p>
               </div>
@@ -197,7 +192,7 @@ export default function BookPage() {
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-4 h-4 ${
+                    className={`w-3 h-3 sm:w-4 sm:h-4 ${
                       i < review.rating
                         ? "text-yellow-400 fill-yellow-400"
                         : "text-gray-300"
@@ -208,7 +203,7 @@ export default function BookPage() {
             </div>
           ))
         ) : (
-          <div className="text-center text-muted-foreground">
+          <div className="text-center text-xs sm:text-sm text-muted-foreground">
             No hay reseñas para este libro.
           </div>
         )}

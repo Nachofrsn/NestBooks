@@ -1,10 +1,6 @@
-"use client";
-
 import axios from "axios";
 import { useState, useEffect } from "react";
-
 import { toast } from "sonner";
-
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,14 +18,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Star } from "lucide-react";
+import { Star, Trash2 } from 'lucide-react';
 import { Header } from "@/components/ui/header";
-
 import { url } from "@/utils/constants";
-
 // @ts-ignore
 import useAuthStore from "../store/authStore";
 
@@ -66,9 +61,8 @@ export default function Profile() {
   const [reviewBook, setReviewBook] = useState<Book | null>(null);
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(0);
-  const [changeStatusBook, setChangeStatusBook] = useState<UserBook | null>(
-    null
-  );
+  const [changeStatusBook, setChangeStatusBook] = useState<UserBook | null>(null);
+  const [deleteBook, setDeleteBook] = useState<UserBook | null>(null);
 
   useEffect(() => {
     fetchBooks();
@@ -102,16 +96,9 @@ export default function Profile() {
       if (response.status === 201) {
         toast.success("Reseña enviada con éxito");
       }
-
     } catch (e) {
       console.log("Error submitting review");
     }
-    console.log("Submitting review:", {
-      bookId: reviewBook?.id,
-      review,
-      rating,
-      userId: user.id,
-    });
     setReviewBook(null);
     setReview("");
     setRating(0);
@@ -121,7 +108,7 @@ export default function Profile() {
     if (!changeStatusBook) return;
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/bookdetails",
+        `${url}/bookdetails`,
         {
           userId: user.id,
           bookId: changeStatusBook.bookId,
@@ -145,12 +132,28 @@ export default function Profile() {
       toast.error("Error al actualizar el estado del libro.");
       console.error(error);
     }
-    console.log("Changing status:", {
-      bookId: changeStatusBook.book.id,
-      newStatus,
-    });
     setChangeStatusBook(null);
     await fetchBooks();
+  };
+
+  const handleDeleteBook = async () => {
+    if (!deleteBook) return;
+    try {
+      const response = await axios.delete(`${url}/books/${deleteBook.bookId}`, {
+        params: { userId: user.id },
+      });
+
+      if (response.status === 204) {
+        toast.success("Libro eliminado con éxito");
+        await fetchBooks();
+      } else {
+        throw new Error("No se pudo eliminar el libro.");
+      }
+    } catch (error) {
+      toast.error("Error al eliminar el libro.");
+      console.error(error);
+    }
+    setDeleteBook(null);
   };
 
   return (
@@ -233,6 +236,18 @@ export default function Profile() {
                           </DialogTrigger>
                         </Dialog>
                       )}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-2 left-2"
+                            onClick={() => setDeleteBook(ubook)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                      </Dialog>
                     </div>
                   </Card>
                 ))
@@ -353,6 +368,24 @@ export default function Profile() {
               Leyendo
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={!!deleteBook} onOpenChange={() => setDeleteBook(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar eliminación</DialogTitle>
+          </DialogHeader>
+          <p>¿Estás seguro de que quieres eliminar este libro?</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteBook(null)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteBook}>
+              Eliminar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

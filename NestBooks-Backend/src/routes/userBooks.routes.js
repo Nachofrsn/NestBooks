@@ -85,4 +85,18 @@ router.get("/accountdetails", async (req, res) => {
   }
 });
 
+router.delete("/books/:id", async (req, res) => {
+  const book_id = Number(req.params.id);
+  const user_id = Number(req.query.userId);
+
+  try {
+    await prisma.userBook.delete({
+      where: { userId_bookId: { userId: user_id, bookId: book_id } },
+    });
+    res.status(204).send();
+  } catch (e) {
+    res.status(500).json({ error: "Error deleting book" });
+  }
+});
+
 export default router;
